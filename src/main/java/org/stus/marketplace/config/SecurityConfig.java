@@ -21,7 +21,7 @@ import org.stus.marketplace.services.PersonDetailsService;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    //for mapping models and DTO in rest applications
+    //for mapping models and DTO in rest applications!!!
     @Bean
     public ModelMapper modelMapper() {
         ModelMapper modelMapper = new ModelMapper();
