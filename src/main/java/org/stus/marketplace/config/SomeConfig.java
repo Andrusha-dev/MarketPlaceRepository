@@ -4,7 +4,9 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class SomeConfig {
+    //add some instruction by user1
 
 
-    //add some construction by user2
+
+
 }
