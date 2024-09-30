@@ -16,6 +16,7 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -58,25 +59,20 @@ public class SecurityConfig {
         http
                 .csrf(httpSecurityCsrfConfigurer -> httpSecurityCsrfConfigurer.disable())
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/person/registration", "/auth/loginPage").permitAll()
+                        .requestMatchers("/person/registration", "/loginPage", "/login").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(formLogin -> formLogin               //налаштування форми автентифікації
-                        .loginPage("/auth/loginPage")
+                        .loginPage("/loginPage")
                         .loginProcessingUrl("/process_login")
                         .defaultSuccessUrl("/item", true)
                         .failureUrl("/loginPage?error")
                         .permitAll()
                 )
-
-                //.securityContext(context -> context.securityContextRepository(              //for username&password authentication in rest api application
-                //        new DelegatingSecurityContextRepository(
-                //                new RequestAttributeSecurityContextRepository(),
-                //                new HttpSessionSecurityContextRepository()
-                //        )))
-
                 //.httpBasic(Customizer.withDefaults())    // for basic authentication in rest api authentication
                 .rememberMe(Customizer.withDefaults());
+
+
 
         return http.build();
 
