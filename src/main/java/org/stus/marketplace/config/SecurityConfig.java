@@ -62,13 +62,15 @@ public class SecurityConfig {
                         .requestMatchers("/person/registration", "/loginPage", "/login").permitAll()
                         .anyRequest().authenticated()
                 )
-                .formLogin(formLogin -> formLogin               //налаштування форми автентифікації
+                /*
+                .formLogin(formLogin -> formLogin               //   for using with formlogin authentication
                         .loginPage("/loginPage")
                         .loginProcessingUrl("/process_login")
                         .defaultSuccessUrl("/item", true)
                         .failureUrl("/loginPage?error")
                         .permitAll()
                 )
+                */
                 //.httpBasic(Customizer.withDefaults())    // for basic authentication in rest api authentication
                 .rememberMe(Customizer.withDefaults());
 
