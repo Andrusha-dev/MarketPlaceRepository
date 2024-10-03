@@ -1,19 +1,30 @@
 package org.stus.marketplace.controllers;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.hibernate5.SpringSessionContext;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+import org.stus.marketplace.dto.ItemDTO;
 import org.stus.marketplace.dto.PersonDTO;
+import org.stus.marketplace.models.Item;
 import org.stus.marketplace.models.Person;
+import org.stus.marketplace.services.ItemService;
 import org.stus.marketplace.services.PersonService;
+import org.stus.marketplace.utils.item_utils.ItemErrorResponse;
+import org.stus.marketplace.utils.item_utils.ItemNotFoundException;
 import org.stus.marketplace.utils.person_utils.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -22,13 +33,15 @@ import java.util.stream.Collectors;
 @RequestMapping("/person")
 public class PersonController {
     private final PersonService personService;
+    private final ItemService itemService;
     private final ModelMapper modelMapper;
     private final PersonDTOValidator personDTOValidator;
     private final PersonValidator personValidator;
 
     @Autowired
-    public PersonController(PersonService personService, ModelMapper modelMapper, PersonDTOValidator personDTOValidator, PersonValidator personValidator) {
+    public PersonController(PersonService personService, ItemService itemService, ModelMapper modelMapper, PersonDTOValidator personDTOValidator, PersonValidator personValidator) {
         this.personService = personService;
+        this.itemService = itemService;
         this.modelMapper = modelMapper;
         this.personDTOValidator = personDTOValidator;
         this.personValidator = personValidator;
