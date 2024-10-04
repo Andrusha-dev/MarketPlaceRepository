@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.Cascade;
 
 import java.util.List;
+import java.util.Objects;
 
 
 @Entity
@@ -99,6 +100,20 @@ public class Item {
 
     public void setItemOrders(List<ItemOrder> itemOrders) {
         this.itemOrders = itemOrders;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Item item = (Item) o;
+        return id == item.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 
 
