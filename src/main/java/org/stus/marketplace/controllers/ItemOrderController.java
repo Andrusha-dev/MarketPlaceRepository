@@ -1,16 +1,29 @@
 package org.stus.marketplace.controllers;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+import org.stus.marketplace.dto.ItemDTO;
+import org.stus.marketplace.dto.ItemEntryDTO;
 import org.stus.marketplace.dto.ItemOrderDTO;
+import org.stus.marketplace.dto.PersonDTO;
+import org.stus.marketplace.models.Item;
+import org.stus.marketplace.models.ItemEntry;
 import org.stus.marketplace.models.ItemOrder;
+import org.stus.marketplace.models.Person;
+import org.stus.marketplace.security.PersonDetails;
 import org.stus.marketplace.services.ItemOrderService;
+import org.stus.marketplace.services.ItemService;
+import org.stus.marketplace.services.PersonService;
 import org.stus.marketplace.utils.itemOrder_utils.ItemOrderErrorResponse;
 import org.stus.marketplace.utils.itemOrder_utils.ItemOrderNotCreateException;
 import org.stus.marketplace.utils.itemOrder_utils.ItemOrderNotFoundException;
@@ -20,6 +33,7 @@ import org.stus.marketplace.utils.item_utils.ItemNotFoundException;
 import org.stus.marketplace.utils.person_utils.PersonErrorResponse;
 import org.stus.marketplace.utils.person_utils.PersonNotFoundException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -29,15 +43,28 @@ import java.util.stream.Collectors;
 public class ItemOrderController {
     private final ItemOrderService itemOrderService;
     private final ModelMapper modelMapper;
+    private final PersonService personService;
+    private final ItemService itemService;
 
     @Autowired
-    public ItemOrderController(ItemOrderService itemOrderService, ModelMapper modelMapper) {
+    public ItemOrderController(ItemOrderService itemOrderService, ModelMapper modelMapper, PersonService personService, ItemService itemService) {
         this.itemOrderService = itemOrderService;
         this.modelMapper = modelMapper;
+        this.personService = personService;
+        this.itemService = itemService;
     }
 
     @PostMapping()
-    public ResponseEntity<HttpStatus> createItemOrder(@RequestBody @Valid ItemOrderDTO itemOrderDTO, BindingResult bindingResult) {
+    public ResponseEntity<HttpStatus> createItemOrder(@RequestBody @Valid ItemOrderDTO itemOrderDTO,
+                                                      BindingResult bindingResult,
+                                                      HttpServletRequest request) {
+
+        HttpSession session = request.getSession();
+
+        PersonDetails personDetails = (PersonDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Person person = personDetails.getPerson();
+        System.out.println(person);
+
         if (bindingResult.hasErrors()) {
             StringBuilder builder = new StringBuilder();
             List<FieldError> errors = bindingResult.getFieldErrors();
@@ -48,7 +75,7 @@ public class ItemOrderController {
             throw new ItemOrderNotCreateException(builder.toString());
         }
 
-        itemOrderService.saveItemOrder(convertToItemOrder(itemOrderDTO));
+        itemOrderService.saveItemOrder(convertToItemOrder(itemOrderDTO), session);
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
@@ -69,6 +96,7 @@ public class ItemOrderController {
         return convertToItemOrderDTO(foundedItemOrder.get());
     }
 
+    /*
     @PatchMapping("/{id}")
     public ResponseEntity<HttpStatus> updateItemOrder(@PathVariable("id") int id,
                                                       @RequestBody @Valid ItemOrderDTO itemOrderDTO, BindingResult bindingResult) {
@@ -94,6 +122,7 @@ public class ItemOrderController {
         itemOrderService.updateItemOrder(updatedItemOrder);
         return ResponseEntity.ok(HttpStatus.OK);
     }
+    */
 
     @DeleteMapping("/{id}")
     public ResponseEntity<HttpStatus> deleteItemOrder(@PathVariable("id") int id) {
@@ -108,11 +137,40 @@ public class ItemOrderController {
 
 
     private ItemOrder convertToItemOrder(ItemOrderDTO itemOrderDTO) {
-        return modelMapper.map(itemOrderDTO, ItemOrder.class);
+        ItemOrder itemOrder = new ItemOrder();
+        itemOrder.setOwner(personService.findPersonById(itemOrderDTO.getOwner().getId()).get());
+        List<ItemEntryDTO> itemEntriesDTO = itemOrderDTO.getItemEntriesDTO();
+        List<ItemEntry> itemEntries = itemEntriesDTO.stream()
+                .map(itemEntryDTO -> {
+                    ItemEntry itemEntry = new ItemEntry();
+                    itemEntry.setNumberOfItems(itemEntryDTO.getNumberOfItems());
+                    itemEntry.setOrderedItem(itemService.findItemById(itemEntryDTO.getOrderedItemDTO().getId()).get());
+                    return itemEntry;
+                })
+                .collect(Collectors.toList());
+        itemOrder.setItemEntries(itemEntries);
+
+        return itemOrder;
     }
 
     private ItemOrderDTO convertToItemOrderDTO(ItemOrder itemOrder) {
-        return modelMapper.map(itemOrder, ItemOrderDTO.class);
+        ItemOrderDTO itemOrderDTO = new ItemOrderDTO();
+        itemOrderDTO.setId(itemOrder.getId());
+        itemOrderDTO.setOwner(modelMapper.map(itemOrder.getOwner(), PersonDTO.class));
+        List<ItemEntry> itemEntries = itemOrder.getItemEntries();
+        List<ItemEntryDTO> itemEntriesDTO = itemEntries.stream()
+                .map(itemEntry -> {
+                    ItemEntryDTO itemEntryDTO = new ItemEntryDTO();
+                    itemEntryDTO.setId(itemEntry.getId());
+                    itemEntryDTO.setNumberOfItems(itemEntry.getNumberOfItems());
+                    Item item = itemService.findItemById(itemEntry.getOrderedItem().getId()).get();
+                    itemEntryDTO.setOrderedItemDTO(modelMapper.map(itemEntry.getOrderedItem(), ItemDTO.class));
+                    return itemEntryDTO;
+                })
+                .collect(Collectors.toList());
+        itemOrderDTO.setItemEntriesDTO(itemEntriesDTO);
+
+        return itemOrderDTO;
     }
 
 

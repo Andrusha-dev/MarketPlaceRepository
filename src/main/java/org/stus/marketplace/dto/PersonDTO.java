@@ -8,27 +8,32 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 
 public class PersonDTO {
-    @Column(name = "username")
+    private int id;
+
     @NotEmpty(message = "Username should not be empty")
     @Size(min = 2, max = 100, message = "Username size should be between 2 and 100")
     private String username;
 
     @NotEmpty(message = "Password should not be empty")
     @Size(min = 8, max = 200, message = "Password size should be between 8 and 100")
-    @Column(name = "password")
     private String password;
 
-    @Column(name = "birth_year")
     @Min(value = 1900, message = "Birth year should be biggest then 1900")
     private int birthYear;
 
-    @Column(name = "email")
     @Email
     private String email;
 
-    @Column(name = "phone")
     private String phone;
 
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public String getUsername() {
         return username;

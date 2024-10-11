@@ -34,25 +34,6 @@ public class ItemController {
     }
 
 
-    @PostMapping()
-    public ResponseEntity<HttpStatus> saveItem(@RequestBody @Valid ItemDTO itemDTO, BindingResult bindingResult) {
-        itemDTOValidator.validate(itemDTO, bindingResult);
-        if (bindingResult.hasErrors()) {
-            StringBuilder builder = new StringBuilder();
-            List<FieldError> errors = bindingResult.getFieldErrors();
-            for (FieldError error : errors) {
-                builder.append(error.getField() + " : " + error.getDefaultMessage() + ";");
-            }
-
-            throw new ItemNotCreateException(builder.toString());
-        }
-
-        System.out.println(itemDTO);
-
-        itemService.saveItem(convertToItem(itemDTO));
-        return ResponseEntity.ok(HttpStatus.OK);
-    }
-
     @GetMapping()
     public List<ItemDTO> getAllItems() {
         return itemService.findAllItems().stream()
@@ -79,6 +60,23 @@ public class ItemController {
         }
 
         return convertToItemDTO(foundedItem.get());
+    }
+
+    @PostMapping()
+    public ResponseEntity<HttpStatus> createItem(@RequestBody @Valid ItemDTO itemDTO, BindingResult bindingResult) {
+        itemDTOValidator.validate(itemDTO, bindingResult);
+        if (bindingResult.hasErrors()) {
+            StringBuilder builder = new StringBuilder();
+            List<FieldError> errors = bindingResult.getFieldErrors();
+            for (FieldError error : errors) {
+                builder.append(error.getField() + " : " + error.getDefaultMessage() + ";");
+            }
+
+            throw new ItemNotCreateException(builder.toString());
+        }
+
+        itemService.saveItem(convertToItem(itemDTO));
+        return ResponseEntity.ok(HttpStatus.OK);
     }
 
     @PatchMapping("/{id}")

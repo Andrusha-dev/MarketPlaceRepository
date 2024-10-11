@@ -47,22 +47,6 @@ public class PersonController {
         this.personValidator = personValidator;
     }
 
-    @PostMapping()
-    public ResponseEntity<HttpStatus> createPerson(@RequestBody @Valid PersonDTO personDTO, BindingResult bindingResult) {
-        personDTOValidator.validate(personDTO, bindingResult);
-        if (bindingResult.hasErrors()) {
-            StringBuilder builder = new StringBuilder();
-            List<FieldError> errors = bindingResult.getFieldErrors();
-            for (FieldError error : errors) {
-                builder.append(error.getField() + " - " + error.getDefaultMessage() + ";");
-            }
-
-            throw new PersonNotCreateException(builder.toString());
-        }
-
-        personService.savePerson(convertToPerson(personDTO));
-        return ResponseEntity.ok(HttpStatus.OK);
-    }
 
     @GetMapping()
     public List<PersonDTO> getAllPersons() {
@@ -92,6 +76,22 @@ public class PersonController {
         return convertToPersonDTO(findedPerson.get());
     }
 
+    @PostMapping()
+    public ResponseEntity<HttpStatus> createPerson(@RequestBody @Valid PersonDTO personDTO, BindingResult bindingResult) {
+        personDTOValidator.validate(personDTO, bindingResult);
+        if (bindingResult.hasErrors()) {
+            StringBuilder builder = new StringBuilder();
+            List<FieldError> errors = bindingResult.getFieldErrors();
+            for (FieldError error : errors) {
+                builder.append(error.getField() + " - " + error.getDefaultMessage() + ";");
+            }
+
+            throw new PersonNotCreateException(builder.toString());
+        }
+
+        personService.savePerson(convertToPerson(personDTO));
+        return ResponseEntity.ok(HttpStatus.OK);
+    }
 
     @PatchMapping("/{id}")
     public ResponseEntity<HttpStatus> updatePerson(@RequestBody @Valid PersonDTO personDTO,

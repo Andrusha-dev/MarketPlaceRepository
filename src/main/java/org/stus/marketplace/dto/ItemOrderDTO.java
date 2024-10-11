@@ -1,16 +1,26 @@
 package org.stus.marketplace.dto;
 
 import jakarta.validation.constraints.NotNull;
-import org.stus.marketplace.models.Item;
-import org.stus.marketplace.models.Person;
+
+import java.util.List;
 
 public class ItemOrderDTO {
+    private int id;
+
     @NotNull(message = "Owner should be defined")
     private PersonDTO owner;
 
-    @NotNull(message = "Some item should be chosen")
-    private ItemDTO orderedItem;
+    @NotNull(message = "Some items (item entries) should be chosen")
+    private List<ItemEntryDTO> itemEntriesDTO;
 
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public PersonDTO getOwner() {
         return owner;
@@ -20,11 +30,11 @@ public class ItemOrderDTO {
         this.owner = owner;
     }
 
-    public ItemDTO getOrderedItem() {
-        return orderedItem;
+    public List<ItemEntryDTO> getItemEntriesDTO() {
+        return itemEntriesDTO;
     }
 
-    public void setOrderedItem(ItemDTO orderedItem) {
-        this.orderedItem = orderedItem;
+    public void setItemEntriesDTO(List<ItemEntryDTO> itemEntriesDTO) {
+        this.itemEntriesDTO = itemEntriesDTO;
     }
 }

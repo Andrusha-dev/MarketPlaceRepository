@@ -3,8 +3,10 @@ package org.stus.marketplace.models;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import org.hibernate.annotations.Cascade;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -23,10 +25,10 @@ public class ItemOrder {
     @NotNull(message = "Owner should be defined")
     private Person owner;
 
-    @ManyToOne
-    @JoinColumn(name = "item_id", referencedColumnName = "id")
-    @NotNull(message = "Some item should be chosen")
-    private Item orderedItem;
+    @OneToMany(mappedBy = "itemOrder")
+    @Cascade(org.hibernate.annotations.CascadeType.SAVE_UPDATE)
+    @NotNull(message = "Some items (item entries) should be chosen")
+    private List<ItemEntry> itemEntries;
 
 
     public ItemOrder() {}
@@ -56,12 +58,26 @@ public class ItemOrder {
         this.owner = owner;
     }
 
-    public Item getOrderedItem() {
-        return orderedItem;
+    public List<ItemEntry> getItemEntries() {
+        return itemEntries;
     }
 
-    public void setOrderedItem(Item orderedItem) {
-        this.orderedItem = orderedItem;
+    public void setItemEntries(List<ItemEntry> itemEntries) {
+        this.itemEntries = itemEntries;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ItemOrder itemOrder = (ItemOrder) o;
+        return id == itemOrder.id && Objects.equals(createAt, itemOrder.createAt) && Objects.equals(owner, itemOrder.owner) && Objects.equals(itemEntries, itemOrder.itemEntries);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, createAt, owner, itemEntries);
     }
 
 
@@ -71,19 +87,5 @@ public class ItemOrder {
                 "id=" + id +
                 ", createAt=" + createAt +
                 '}';
-    }
-
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ItemOrder itemOrder = (ItemOrder) o;
-        return id == itemOrder.id && Objects.equals(createAt, itemOrder.createAt) && Objects.equals(owner, itemOrder.owner) && Objects.equals(orderedItem, itemOrder.orderedItem);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, createAt, owner, orderedItem);
     }
 }

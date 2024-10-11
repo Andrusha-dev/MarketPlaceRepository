@@ -8,9 +8,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.stus.marketplace.dto.ItemDTO;
-import org.stus.marketplace.dto.StoreDTO;
+import org.stus.marketplace.dto.ItemEntryDTO;
 import org.stus.marketplace.models.Item;
-import org.stus.marketplace.models.Store;
+import org.stus.marketplace.models.ItemEntry;
 import org.stus.marketplace.services.ItemService;
 import org.stus.marketplace.services.StoreService;
 import org.stus.marketplace.utils.item_utils.ItemErrorResponse;
@@ -21,7 +21,6 @@ import org.stus.marketplace.utils.store_utils.StoreErrorResponse;
 import org.stus.marketplace.utils.store_utils.StoreIsEmptyException;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -40,26 +39,44 @@ public class StoreController {
         this.modelMapper = modelMapper;
     }
 
-    @PostMapping("/addItemToStore/{id}")
-    public ResponseEntity<HttpStatus> addItemToStore(HttpServletRequest request, @RequestBody StoreDTO storeDTO, @PathVariable("id") int id) {
-        Store store = this.convertToStore(storeDTO);
+    @PostMapping("/addItemEntryToStore")
+    public ResponseEntity<HttpStatus> addItemEntryToStore(HttpServletRequest request, @RequestBody ItemEntryDTO itemEntryDTO) {
+        Optional<Item> item = itemService.findItemById(itemEntryDTO.getOrderedItemDTO().getId());
         HttpSession session = request.getSession();
+        if (item.isEmpty()) {
+            throw new ItemNotFoundException("Item not found");
+        }
+        if ((item.get().getNumberOfItems() - itemEntryDTO.getNumberOfItems()) < 0) {
+            throw new NumberOfItemsIsNotEnoughException("Number of items is not enough");
+        }
 
-        storeService.addItem(session, store, id);
+        ItemEntry itemEntry = convertToItemEntry(itemEntryDTO);
+
+        storeService.addItem(session, itemEntry);
 
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
     @PostMapping("/updateStore")
-    public ResponseEntity<HttpStatus> updateStore(@RequestBody List<StoreDTO> storesDTO, HttpServletRequest request) {
-        List<Store> stores = new ArrayList<>();
+    public ResponseEntity<HttpStatus> updateStore(@RequestBody List<ItemEntryDTO> itemEntriesDTO, HttpServletRequest request) {
+        List<ItemEntry> itemEntries = new ArrayList<>();
         HttpSession session = request.getSession();
 
-        for (StoreDTO storeDTO : storesDTO) {
-            stores.add(this.convertToStore(storeDTO));
+        for (ItemEntryDTO itemEntryDTO : itemEntriesDTO) {
+            itemEntries.add(this.convertToItemEntry(itemEntryDTO));
         }
 
-        storeService.updateStore(session, stores);
+        for (ItemEntry itemEntry : itemEntries) {
+            Optional<Item> item = itemService.findItemById(itemEntry.getOrderedItem().getId());
+            if (item.isEmpty()) {
+                throw new ItemNotFoundException("Item not found");
+            }
+            if ((item.get().getNumberOfItems() - itemEntry.getNumberOfItems()) < 0) {
+                throw new NumberOfItemsIsNotEnoughException("Number of items is not enough");
+            }
+        }
+
+        storeService.updateStore(session, itemEntries);
 
         return ResponseEntity.ok(HttpStatus.OK);
     }
@@ -67,6 +84,22 @@ public class StoreController {
     @DeleteMapping("/deleteItemFromStore/{id}")
     public ResponseEntity<HttpStatus> deleteItemFromStore(HttpServletRequest request, @PathVariable("id") int id) {
         HttpSession session = request.getSession();
+        List<ItemEntry> itemEntries = new ArrayList<>((List<ItemEntry>)session.getAttribute("store"));
+        Optional<Item> foundedItem = itemService.findItemById(id);
+        boolean isPresent = false;
+
+        if (session.getAttribute("store")==null) {
+            throw new StoreIsEmptyException("Store is empty");
+        }
+
+        if (foundedItem.isEmpty()) {
+            throw new ItemNotFoundException("Item not found");
+        }
+
+        isPresent = itemEntries.stream().anyMatch(itemEntry -> itemEntry.getOrderedItem().getId()==foundedItem.get().getId());
+        if (isPresent==false) {
+            throw new ItemIsAbsentInStoreException("Item is absent in store");
+        }
 
         storeService.deleteItem(session, id);
 
@@ -76,6 +109,9 @@ public class StoreController {
     @DeleteMapping("/clearStore")
     public ResponseEntity<HttpStatus> clearStore(HttpServletRequest request) {
         HttpSession session = request.getSession();
+        if (session.getAttribute("store")==null) {
+            throw new StoreIsEmptyException("Store is empty");
+        }
 
         storeService.clearStore(session);
 
@@ -83,24 +119,35 @@ public class StoreController {
     }
 
     @GetMapping("/showStore")
-    public List<StoreDTO> showStore(HttpServletRequest request) {
+    public List<ItemEntryDTO> showStore(HttpServletRequest request) {
         HttpSession session = request.getSession();
-        List<Store> stores = storeService.showStore(session);
+        List<ItemEntry> itemEntries = storeService.showStore(session);
+        if (itemEntries==null) {
+            throw new StoreIsEmptyException("Store is empty");
+        }
 
-        List<StoreDTO> storesDTO = stores.stream()
-                .map(store -> convertToStoreDTO(store))
+        List<ItemEntryDTO> itemEntriesDTO = itemEntries.stream()
+                .map(itemEntry -> convertToItemEntryDTO(itemEntry))
                 .collect(Collectors.toList());
 
-        return storesDTO;
+        return itemEntriesDTO;
     }
 
 
-    private Store convertToStore(StoreDTO storeDTO) {
-        return modelMapper.map(storeDTO, Store.class);
+    private ItemEntry convertToItemEntry(ItemEntryDTO itemEntryDTO) {
+        ItemEntry itemEntry = new ItemEntry();
+        itemEntry.setNumberOfItems(itemEntryDTO.getNumberOfItems());
+        itemEntry.setOrderedItem(itemService.findItemById(itemEntryDTO.getOrderedItemDTO().getId()).get());
+        return itemEntry;
     }
 
-    private StoreDTO convertToStoreDTO(Store store) {
-        return modelMapper.map(store, StoreDTO.class);
+    private ItemEntryDTO convertToItemEntryDTO(ItemEntry itemEntry) {
+        ItemEntryDTO itemEntryDTO = new ItemEntryDTO();
+        itemEntryDTO.setNumberOfItems(itemEntry.getNumberOfItems());
+        ItemDTO itemDTO = modelMapper.map(itemEntry.getOrderedItem(), ItemDTO.class);
+        itemEntryDTO.setOrderedItemDTO(itemDTO);
+
+        return itemEntryDTO;
     }
 
 

@@ -40,7 +40,7 @@ public class Item {
 
     @OneToMany(mappedBy = "orderedItem")
     @Cascade(org.hibernate.annotations.CascadeType.SAVE_UPDATE)
-    private List<ItemOrder> itemOrders;
+    private List<ItemEntry> itemEntries;
 
 
     public Item() {}
@@ -94,12 +94,12 @@ public class Item {
         this.category = category;
     }
 
-    public List<ItemOrder> getItemOrders() {
-        return itemOrders;
+    public List<ItemEntry> getItemEntries() {
+        return itemEntries;
     }
 
-    public void setItemOrders(List<ItemOrder> itemOrders) {
-        this.itemOrders = itemOrders;
+    public void setItemEntries(List<ItemEntry> itemEntries) {
+        this.itemEntries = itemEntries;
     }
 
 

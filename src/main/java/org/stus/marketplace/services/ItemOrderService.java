@@ -1,14 +1,14 @@
 package org.stus.marketplace.services;
 
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.stus.marketplace.models.Item;
+import org.stus.marketplace.models.ItemEntry;
 import org.stus.marketplace.models.ItemOrder;
 import org.stus.marketplace.models.Person;
 import org.stus.marketplace.repositories.ItemOrderRepository;
-import org.stus.marketplace.repositories.ItemRepository;
-import org.stus.marketplace.utils.itemOrder_utils.ItemOrderNotFoundException;
 import org.stus.marketplace.utils.item_utils.ItemNotFoundException;
 import org.stus.marketplace.utils.person_utils.PersonNotFoundException;
 
@@ -22,12 +22,16 @@ public class ItemOrderService {
     private final ItemOrderRepository itemOrderRepository;
     private final ItemService itemService;
     private final PersonService personService;
+    private final StoreService storeService;
+    private final ItemEntryService itemEntryService;
 
     @Autowired
-    public ItemOrderService(ItemOrderRepository itemOrderRepository, ItemService itemService, PersonService personService) {
+    public ItemOrderService(ItemOrderRepository itemOrderRepository, ItemService itemService, PersonService personService, StoreService storeService, ItemEntryService itemEntryService) {
         this.itemOrderRepository = itemOrderRepository;
         this.itemService = itemService;
         this.personService = personService;
+        this.storeService = storeService;
+        this.itemEntryService = itemEntryService;
     }
 
 
@@ -40,27 +44,34 @@ public class ItemOrderService {
     }
 
     @Transactional
-    public void saveItemOrder(ItemOrder itemOrder) throws PersonNotFoundException, ItemNotFoundException {
-        Optional<Person> person = personService.findPersonByUserName(itemOrder.getOwner().getUsername());
+    public void saveItemOrder(ItemOrder itemOrder, HttpSession session) throws PersonNotFoundException, ItemNotFoundException {
+        Optional<Person> person = personService.findPersonById(itemOrder.getOwner().getId());
         if (person.isEmpty()) {
             throw new PersonNotFoundException("Person not found");
         }
 
-        Optional<Item> item = itemService.findItemByItemName(itemOrder.getOrderedItem().getItemName());
-        if (item.isEmpty()) {
-            throw new ItemNotFoundException("Item not found");
+        List<ItemEntry> itemEntries = itemOrder.getItemEntries();
+        for (ItemEntry itemEntry : itemEntries) {
+            Optional<Item> foundedItem = itemService.findItemById(itemEntry.getOrderedItem().getId());
+            if (foundedItem.isEmpty()) {
+                throw new ItemNotFoundException("Item not found");
+            }
+            itemEntry.setItemOrder(itemOrder);
+            itemEntryService.saveItemEntry(itemEntry);
+            foundedItem.get().setNumberOfItems(foundedItem.get().getNumberOfItems() - itemEntry.getNumberOfItems());
+            foundedItem.get().getItemEntries().add(itemEntry);
         }
 
         person.get().getItemOders().add(itemOrder);
-        item.get().getItemOrders().add(itemOrder);
-        item.get().setNumberOfItems(item.get().getNumberOfItems()-1);
 
         itemOrder.setCreateAt(new Date(System.currentTimeMillis()));
-        itemOrder.getOwner().setId(person.get().getId());
-        itemOrder.getOrderedItem().setId(item.get().getId());
         itemOrderRepository.save(itemOrder);
+
+        storeService.clearStore(session);
     }
 
+
+    /*
     @Transactional
     public void updateItemOrder(ItemOrder itemOrder) throws PersonNotFoundException, ItemNotFoundException {
         Optional<Person> person = personService.findPersonByUserName(itemOrder.getOwner().getUsername());
@@ -87,6 +98,7 @@ public class ItemOrderService {
         itemOrder.getOrderedItem().setId(item.get().getId());
         itemOrderRepository.save(itemOrder);
     }
+    */
 
     @Transactional
     public void deleteItemOrder(int id) {
