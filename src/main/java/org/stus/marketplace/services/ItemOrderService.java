@@ -44,18 +44,12 @@ public class ItemOrderService {
     }
 
     @Transactional
-    public void saveItemOrder(ItemOrder itemOrder, HttpSession session) throws PersonNotFoundException, ItemNotFoundException {
+    public void saveItemOrder(ItemOrder itemOrder, HttpSession session) {
         Optional<Person> person = personService.findPersonById(itemOrder.getOwner().getId());
-        if (person.isEmpty()) {
-            throw new PersonNotFoundException("Person not found");
-        }
 
         List<ItemEntry> itemEntries = itemOrder.getItemEntries();
         for (ItemEntry itemEntry : itemEntries) {
             Optional<Item> foundedItem = itemService.findItemById(itemEntry.getOrderedItem().getId());
-            if (foundedItem.isEmpty()) {
-                throw new ItemNotFoundException("Item not found");
-            }
             itemEntry.setItemOrder(itemOrder);
             itemEntryService.saveItemEntry(itemEntry);
             foundedItem.get().setNumberOfItems(foundedItem.get().getNumberOfItems() - itemEntry.getNumberOfItems());
@@ -70,35 +64,30 @@ public class ItemOrderService {
         storeService.clearStore(session);
     }
 
-
-    /*
     @Transactional
-    public void updateItemOrder(ItemOrder itemOrder) throws PersonNotFoundException, ItemNotFoundException {
-        Optional<Person> person = personService.findPersonByUserName(itemOrder.getOwner().getUsername());
-        if (person.isEmpty()) {
-            throw new PersonNotFoundException("Person not found");
+    public void updateItemOrder(ItemOrder itemOrder) {
+        Optional<ItemOrder> previousItemOrder = itemOrderRepository.findById(itemOrder.getId());
+        List<ItemEntry> previousItemEntries = previousItemOrder.get().getItemEntries();
+        for (ItemEntry previousItemEntry : previousItemEntries) {
+            Optional<Item> previousItem = itemService.findItemById(previousItemEntry.getOrderedItem().getId());
+            previousItem.get().setNumberOfItems(previousItem.get().getNumberOfItems() + previousItemEntry.getNumberOfItems());
+            previousItem.get().getItemEntries().remove(previousItemEntry);
+            itemEntryService.deleteItemEntry(previousItemEntry.getId());
         }
 
-        Optional<Item> item = itemService.findItemByItemName(itemOrder.getOrderedItem().getItemName());
-        if (item.isEmpty()) {
-            throw new ItemNotFoundException("Item not found");
+
+        List<ItemEntry> itemEntries = itemOrder.getItemEntries();
+        for (ItemEntry itemEntry : itemEntries) {
+            Optional<Item> foundedItem = itemService.findItemById(itemEntry.getOrderedItem().getId());
+            itemEntry.setItemOrder(itemOrder);
+            itemEntryService.saveItemEntry(itemEntry);
+            foundedItem.get().setNumberOfItems(foundedItem.get().getNumberOfItems() - itemEntry.getNumberOfItems());
+            foundedItem.get().getItemEntries().add(itemEntry);
         }
-
-        ItemOrder updatedItemOrder = itemOrderRepository.findById(itemOrder.getId()).get();     //check for null make in ItemOrderController
-        updatedItemOrder.getOwner().getItemOders().remove(updatedItemOrder);
-        updatedItemOrder.getOrderedItem().getItemOrders().remove(updatedItemOrder);
-        updatedItemOrder.getOrderedItem().setNumberOfItems(updatedItemOrder.getOrderedItem().getNumberOfItems()+1);
-
-        person.get().getItemOders().add(itemOrder);
-        item.get().getItemOrders().add(itemOrder);
-        item.get().setNumberOfItems(item.get().getNumberOfItems()-1);
 
         itemOrder.setCreateAt(new Date(System.currentTimeMillis()));
-        itemOrder.getOwner().setId(person.get().getId());
-        itemOrder.getOrderedItem().setId(item.get().getId());
         itemOrderRepository.save(itemOrder);
     }
-    */
 
     @Transactional
     public void deleteItemOrder(int id) {

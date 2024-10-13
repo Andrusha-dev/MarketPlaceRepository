@@ -21,13 +21,11 @@ import org.stus.marketplace.models.ItemEntry;
 import org.stus.marketplace.models.ItemOrder;
 import org.stus.marketplace.models.Person;
 import org.stus.marketplace.security.PersonDetails;
+import org.stus.marketplace.services.ItemEntryService;
 import org.stus.marketplace.services.ItemOrderService;
 import org.stus.marketplace.services.ItemService;
 import org.stus.marketplace.services.PersonService;
-import org.stus.marketplace.utils.itemOrder_utils.ItemOrderErrorResponse;
-import org.stus.marketplace.utils.itemOrder_utils.ItemOrderNotCreateException;
-import org.stus.marketplace.utils.itemOrder_utils.ItemOrderNotFoundException;
-import org.stus.marketplace.utils.itemOrder_utils.ItemOrderNotUpdateException;
+import org.stus.marketplace.utils.itemOrder_utils.*;
 import org.stus.marketplace.utils.item_utils.ItemErrorResponse;
 import org.stus.marketplace.utils.item_utils.ItemNotFoundException;
 import org.stus.marketplace.utils.person_utils.PersonErrorResponse;
@@ -45,13 +43,15 @@ public class ItemOrderController {
     private final ModelMapper modelMapper;
     private final PersonService personService;
     private final ItemService itemService;
+    private final ItemEntryService itemEntryService;
 
     @Autowired
-    public ItemOrderController(ItemOrderService itemOrderService, ModelMapper modelMapper, PersonService personService, ItemService itemService) {
+    public ItemOrderController(ItemOrderService itemOrderService, ModelMapper modelMapper, PersonService personService, ItemService itemService, ItemEntryService itemEntryService) {
         this.itemOrderService = itemOrderService;
         this.modelMapper = modelMapper;
         this.personService = personService;
         this.itemService = itemService;
+        this.itemEntryService = itemEntryService;
     }
 
     @PostMapping()
@@ -61,9 +61,18 @@ public class ItemOrderController {
 
         HttpSession session = request.getSession();
 
-        PersonDetails personDetails = (PersonDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Person person = personDetails.getPerson();
-        System.out.println(person);
+        Optional<Person> person = personService.findPersonById(itemOrderDTO.getOwnerDTO().getId());
+        if (person.isEmpty()) {
+            throw new PersonNotFoundException("Person not found");
+        }
+
+        List<ItemEntryDTO> itemEntriesDTO = itemOrderDTO.getItemEntriesDTO();
+        for (ItemEntryDTO itemEntryDTO : itemEntriesDTO) {
+            Optional<Item> foundedItem = itemService.findItemById(itemEntryDTO.getOrderedItemDTO().getId());
+            if (foundedItem.isEmpty()) {
+                throw new ItemNotFoundException("Item not found");
+            }
+        }
 
         if (bindingResult.hasErrors()) {
             StringBuilder builder = new StringBuilder();
@@ -74,6 +83,7 @@ public class ItemOrderController {
 
             throw new ItemOrderNotCreateException(builder.toString());
         }
+
 
         itemOrderService.saveItemOrder(convertToItemOrder(itemOrderDTO), session);
         return ResponseEntity.ok(HttpStatus.OK);
@@ -96,7 +106,7 @@ public class ItemOrderController {
         return convertToItemOrderDTO(foundedItemOrder.get());
     }
 
-    /*
+
     @PatchMapping("/{id}")
     public ResponseEntity<HttpStatus> updateItemOrder(@PathVariable("id") int id,
                                                       @RequestBody @Valid ItemOrderDTO itemOrderDTO, BindingResult bindingResult) {
@@ -104,6 +114,23 @@ public class ItemOrderController {
         Optional<ItemOrder> foundedItemOrder = itemOrderService.findItemOrderById(id);
         if (foundedItemOrder.isEmpty()) {
             throw new ItemOrderNotFoundException("Item order not found");
+        }
+
+        Optional<Person> person = personService.findPersonById(itemOrderDTO.getOwnerDTO().getId());
+        if (person.isEmpty()) {
+            throw new PersonNotFoundException("Person not found");
+        }
+
+        if (person.get().getId() != foundedItemOrder.get().getOwner().getId()) {
+            throw new DifferentOwnersException("Owner in updated item order are differs than owner in current item order");
+        }
+
+        List<ItemEntryDTO> itemEntriesDTO = itemOrderDTO.getItemEntriesDTO();
+        for (ItemEntryDTO itemEntryDTO : itemEntriesDTO) {
+            Optional<Item> foundedItem = itemService.findItemById(itemEntryDTO.getOrderedItemDTO().getId());
+            if (foundedItem.isEmpty()) {
+                throw new ItemNotFoundException("Item not found");
+            }
         }
 
         ItemOrder updatedItemOrder = convertToItemOrder(itemOrderDTO);
@@ -122,7 +149,7 @@ public class ItemOrderController {
         itemOrderService.updateItemOrder(updatedItemOrder);
         return ResponseEntity.ok(HttpStatus.OK);
     }
-    */
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<HttpStatus> deleteItemOrder(@PathVariable("id") int id) {
@@ -138,7 +165,10 @@ public class ItemOrderController {
 
     private ItemOrder convertToItemOrder(ItemOrderDTO itemOrderDTO) {
         ItemOrder itemOrder = new ItemOrder();
-        itemOrder.setOwner(personService.findPersonById(itemOrderDTO.getOwner().getId()).get());
+
+        Optional<Person> person = personService.findPersonById(itemOrderDTO.getOwnerDTO().getId());
+
+        itemOrder.setOwner(person.get());
         List<ItemEntryDTO> itemEntriesDTO = itemOrderDTO.getItemEntriesDTO();
         List<ItemEntry> itemEntries = itemEntriesDTO.stream()
                 .map(itemEntryDTO -> {
@@ -156,7 +186,7 @@ public class ItemOrderController {
     private ItemOrderDTO convertToItemOrderDTO(ItemOrder itemOrder) {
         ItemOrderDTO itemOrderDTO = new ItemOrderDTO();
         itemOrderDTO.setId(itemOrder.getId());
-        itemOrderDTO.setOwner(modelMapper.map(itemOrder.getOwner(), PersonDTO.class));
+        itemOrderDTO.setOwnerDTO(modelMapper.map(itemOrder.getOwner(), PersonDTO.class));
         List<ItemEntry> itemEntries = itemOrder.getItemEntries();
         List<ItemEntryDTO> itemEntriesDTO = itemEntries.stream()
                 .map(itemEntry -> {
@@ -191,6 +221,12 @@ public class ItemOrderController {
     private ResponseEntity<ItemOrderErrorResponse> handleException(ItemOrderNotUpdateException exc) {
         ItemOrderErrorResponse itemOrderErrorResponse = new ItemOrderErrorResponse(exc.getMessage(), System.currentTimeMillis());
         return new ResponseEntity<ItemOrderErrorResponse>(itemOrderErrorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ItemOrderErrorResponse> handleException(DifferentOwnersException exc) {
+        ItemOrderErrorResponse itemOrderErrorResponse = new ItemOrderErrorResponse(exc.getMessage(), System.currentTimeMillis());
+        return new ResponseEntity<ItemOrderErrorResponse>(itemOrderErrorResponse, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler

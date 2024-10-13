@@ -72,14 +72,13 @@ public class ItemOrder {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ItemOrder itemOrder = (ItemOrder) o;
-        return id == itemOrder.id && Objects.equals(createAt, itemOrder.createAt) && Objects.equals(owner, itemOrder.owner) && Objects.equals(itemEntries, itemOrder.itemEntries);
+        return id == itemOrder.id;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, createAt, owner, itemEntries);
+        return Objects.hashCode(id);
     }
-
 
     @Override
     public String toString() {

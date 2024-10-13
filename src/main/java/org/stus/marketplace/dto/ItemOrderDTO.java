@@ -7,8 +7,7 @@ import java.util.List;
 public class ItemOrderDTO {
     private int id;
 
-    @NotNull(message = "Owner should be defined")
-    private PersonDTO owner;
+    private PersonDTO ownerDTO;
 
     @NotNull(message = "Some items (item entries) should be chosen")
     private List<ItemEntryDTO> itemEntriesDTO;
@@ -22,12 +21,12 @@ public class ItemOrderDTO {
         this.id = id;
     }
 
-    public PersonDTO getOwner() {
-        return owner;
+    public PersonDTO getOwnerDTO() {
+        return ownerDTO;
     }
 
-    public void setOwner(PersonDTO owner) {
-        this.owner = owner;
+    public void setOwnerDTO(PersonDTO ownerDTO) {
+        this.ownerDTO = ownerDTO;
     }
 
     public List<ItemEntryDTO> getItemEntriesDTO() {

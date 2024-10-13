@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.Objects;
+
 @Entity
 @Table(name = "item_entry")
 public class ItemEntry {
@@ -60,6 +62,20 @@ public class ItemEntry {
 
     public void setItemOrder(ItemOrder itemOrder) {
         this.itemOrder = itemOrder;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ItemEntry itemEntry = (ItemEntry) o;
+        return id == itemEntry.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 
     @Override
