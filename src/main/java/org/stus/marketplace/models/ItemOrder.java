@@ -85,6 +85,8 @@ public class ItemOrder {
         return "ItemOrder{" +
                 "id=" + id +
                 ", createAt=" + createAt +
+                ", owner{id=" + owner.getId() + "}" +
+                ", itemEntries=" + itemEntries +
                 '}';
     }
 }

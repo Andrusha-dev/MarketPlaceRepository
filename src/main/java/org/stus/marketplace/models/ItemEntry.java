@@ -65,6 +65,7 @@ public class ItemEntry {
     }
 
 
+    /* //check equals only by field "id"
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -77,13 +78,30 @@ public class ItemEntry {
     public int hashCode() {
         return Objects.hashCode(id);
     }
+    */
+
+    //check equals by all fields
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ItemEntry itemEntry = (ItemEntry) o;
+        return id == itemEntry.id && numberOfItems == itemEntry.numberOfItems && Objects.equals(orderedItem, itemEntry.orderedItem) && Objects.equals(itemOrder, itemEntry.itemOrder);
+    }
+
+    //check equals by all fields
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, numberOfItems, orderedItem, itemOrder);
+    }
 
     @Override
     public String toString() {
         return "ItemEntry{" +
                 "id=" + id +
                 ", numberOfItems=" + numberOfItems +
-                ", orderedItem=" + orderedItem +
+                ", orderedItem{id=" + orderedItem.getId() + "}" +
+                ", itemOrder{id=" + itemOrder.getId() + "}" +
                 '}';
     }
 }

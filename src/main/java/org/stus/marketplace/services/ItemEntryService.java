@@ -33,19 +33,11 @@ public class ItemEntryService {
 
     @Transactional
     public void saveItemEntry(ItemEntry itemEntry) throws NumberOfItemsIsNotEnoughException {
-        if ((itemEntry.getOrderedItem().getNumberOfItems() - itemEntry.getNumberOfItems()) < 0) {
-            throw new NumberOfItemsIsNotEnoughException("Number of items is not enough");
-        }
         itemEntryRepository.save(itemEntry);
     }
 
     @Transactional
-    public void deleteItemEntry(int id) throws ItemEntryNotFoundException {
-        Optional<ItemEntry> deletedStore = itemEntryRepository.findById(id);
-        if (deletedStore.isEmpty()) {
-            throw new ItemEntryNotFoundException("Item entry not found");
-        }
-
+    public void deleteItemEntry(int id) {
         itemEntryRepository.deleteById(id);
     }
 }

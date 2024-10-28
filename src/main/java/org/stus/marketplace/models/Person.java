@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.web.WebProperties;
 
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "person")
@@ -116,6 +117,20 @@ public class Person {
 
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Person person = (Person) o;
+        return id == person.id && birthYear == person.birthYear && Objects.equals(username, person.username) && Objects.equals(email, person.email) && Objects.equals(phone, person.phone) && Objects.equals(role, person.role);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, username, birthYear, email, phone, role);
+    }
+
+
+    @Override
     public String toString() {
         return "Person{" +
                 "id=" + id +
@@ -124,6 +139,8 @@ public class Person {
                 ", birthYear=" + birthYear +
                 ", email='" + email + '\'' +
                 ", phone='" + phone + '\'' +
+                ", role='" + role + '\'' +
+                ", itemOders=" + itemOders +
                 '}';
     }
 }

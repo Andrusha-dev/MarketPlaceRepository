@@ -26,10 +26,7 @@ public class StoreService {
         this.itemService = itemService;
     }
 
-    //Methods for change store in session
     public void addItem(HttpSession session, ItemEntry itemEntry) {
-        System.out.println(itemEntry);
-
         if (session.getAttribute("store")==null) {
             session.setAttribute("store", Arrays.asList(itemEntry));
         } else {

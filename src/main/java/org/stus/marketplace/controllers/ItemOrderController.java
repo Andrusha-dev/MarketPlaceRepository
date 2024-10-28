@@ -25,9 +25,12 @@ import org.stus.marketplace.services.ItemEntryService;
 import org.stus.marketplace.services.ItemOrderService;
 import org.stus.marketplace.services.ItemService;
 import org.stus.marketplace.services.PersonService;
+import org.stus.marketplace.utils.ItemEntry_utils.ItemEntryErrorResponse;
+import org.stus.marketplace.utils.ItemEntry_utils.ItemEntryNotFoundException;
 import org.stus.marketplace.utils.itemOrder_utils.*;
 import org.stus.marketplace.utils.item_utils.ItemErrorResponse;
 import org.stus.marketplace.utils.item_utils.ItemNotFoundException;
+import org.stus.marketplace.utils.item_utils.NumberOfItemsIsNotEnoughException;
 import org.stus.marketplace.utils.person_utils.PersonErrorResponse;
 import org.stus.marketplace.utils.person_utils.PersonNotFoundException;
 
@@ -71,6 +74,10 @@ public class ItemOrderController {
             Optional<Item> foundedItem = itemService.findItemById(itemEntryDTO.getOrderedItemDTO().getId());
             if (foundedItem.isEmpty()) {
                 throw new ItemNotFoundException("Item not found");
+            }
+
+            if ((foundedItem.get().getNumberOfItems() - itemEntryDTO.getNumberOfItems()) < 0) {
+                throw new NumberOfItemsIsNotEnoughException("Number of items is not enough");
             }
         }
 
@@ -130,6 +137,10 @@ public class ItemOrderController {
             Optional<Item> foundedItem = itemService.findItemById(itemEntryDTO.getOrderedItemDTO().getId());
             if (foundedItem.isEmpty()) {
                 throw new ItemNotFoundException("Item not found");
+            }
+
+            if ((foundedItem.get().getNumberOfItems() - itemEntryDTO.getNumberOfItems()) < 0) {
+                throw new NumberOfItemsIsNotEnoughException("Number of items is not enough");
             }
         }
 
@@ -239,5 +250,17 @@ public class ItemOrderController {
     private ResponseEntity<ItemErrorResponse> handleException(ItemNotFoundException exc) {
         ItemErrorResponse itemErrorResponse = new ItemErrorResponse(exc.getMessage(), System.currentTimeMillis());
         return new ResponseEntity<ItemErrorResponse>(itemErrorResponse, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler
+    private ResponseEntity<ItemErrorResponse> handleException(NumberOfItemsIsNotEnoughException exc) {
+        ItemErrorResponse itemErrorResponse = new ItemErrorResponse(exc.getMessage(), System.currentTimeMillis());
+        return new ResponseEntity<ItemErrorResponse>(itemErrorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    private ResponseEntity<ItemEntryErrorResponse> handleException(ItemEntryNotFoundException exc) {
+        ItemEntryErrorResponse itemEntryErrorResponse = new ItemEntryErrorResponse(exc.getMessage(), System.currentTimeMillis());
+        return new ResponseEntity<ItemEntryErrorResponse>(itemEntryErrorResponse, HttpStatus.NOT_FOUND);
     }
 }

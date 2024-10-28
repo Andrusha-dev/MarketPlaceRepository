@@ -9,6 +9,7 @@ import org.stus.marketplace.models.ItemEntry;
 import org.stus.marketplace.models.ItemOrder;
 import org.stus.marketplace.models.Person;
 import org.stus.marketplace.repositories.ItemOrderRepository;
+import org.stus.marketplace.utils.ItemEntry_utils.ItemEntryNotFoundException;
 import org.stus.marketplace.utils.item_utils.ItemNotFoundException;
 import org.stus.marketplace.utils.person_utils.PersonNotFoundException;
 
@@ -67,6 +68,7 @@ public class ItemOrderService {
     @Transactional
     public void updateItemOrder(ItemOrder itemOrder) {
         Optional<ItemOrder> previousItemOrder = itemOrderRepository.findById(itemOrder.getId());
+
         List<ItemEntry> previousItemEntries = previousItemOrder.get().getItemEntries();
         for (ItemEntry previousItemEntry : previousItemEntries) {
             Optional<Item> previousItem = itemService.findItemById(previousItemEntry.getOrderedItem().getId());
@@ -91,6 +93,13 @@ public class ItemOrderService {
 
     @Transactional
     public void deleteItemOrder(int id) {
+        /*
+        List<ItemEntry> itemEntries = itemOrderRepository.findById(id).get().getItemEntries();
+        for (ItemEntry itemEntry : itemEntries) {
+            itemEntryService.deleteItemEntry(itemEntry.getId());
+        }
+        */
+
         itemOrderRepository.deleteById(id);
     }
 }

@@ -102,7 +102,7 @@ public class Item {
         this.itemEntries = itemEntries;
     }
 
-
+    /* //based only on "id"
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -115,6 +115,22 @@ public class Item {
     public int hashCode() {
         return Objects.hashCode(id);
     }
+    */
+
+    //based on all fields
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Item item = (Item) o;
+        return id == item.id && numberOfItems == item.numberOfItems && price == item.price && Objects.equals(itemName, item.itemName) && Objects.equals(itemInfo, item.itemInfo) && Objects.equals(category, item.category);
+    }
+
+    //based on all fields
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, itemName, numberOfItems, price, itemInfo, category);
+    }
 
 
     @Override
@@ -126,6 +142,7 @@ public class Item {
                 ", price=" + price +
                 ", itemInfo='" + itemInfo + '\'' +
                 ", category='" + category + '\'' +
+                ", itemEntries=" + itemEntries +
                 '}';
     }
 }
