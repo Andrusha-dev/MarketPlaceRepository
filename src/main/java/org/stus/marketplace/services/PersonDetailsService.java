@@ -1,5 +1,7 @@
 package org.stus.marketplace.services;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -14,6 +16,7 @@ import java.util.Optional;
 @Service
 public class PersonDetailsService implements UserDetailsService {
     private final PersonRepository personRepository;
+    private static final Logger logger = LogManager.getLogger(PersonDetailsService.class.getName());
 
     @Autowired
     public PersonDetailsService(PersonRepository personRepository) {
@@ -25,6 +28,7 @@ public class PersonDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<Person> findedPerson = personRepository.findByUsername(username);
         if (findedPerson.isEmpty()) {
+            logger.error("Username not found");
             throw new UsernameNotFoundException("Person not found");
         }
 

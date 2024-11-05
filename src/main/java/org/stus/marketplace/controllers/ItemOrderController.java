@@ -3,6 +3,8 @@ package org.stus.marketplace.controllers;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -47,6 +49,7 @@ public class ItemOrderController {
     private final PersonService personService;
     private final ItemService itemService;
     private final ItemEntryService itemEntryService;
+    private static final Logger logger = LogManager.getLogger(ItemOrderController.class.getName());
 
     @Autowired
     public ItemOrderController(ItemOrderService itemOrderService, ModelMapper modelMapper, PersonService personService, ItemService itemService, ItemEntryService itemEntryService) {
@@ -61,6 +64,9 @@ public class ItemOrderController {
     public ResponseEntity<HttpStatus> createItemOrder(@RequestBody @Valid ItemOrderDTO itemOrderDTO,
                                                       BindingResult bindingResult,
                                                       HttpServletRequest request) {
+        logger.debug("catch ItemOrderDTO with ownerDTO id: " + itemOrderDTO.getOwnerDTO().getId());
+        logger.debug("catch BindingResult: " + bindingResult.getClass().getName());
+        logger.debug("catch HttpServletRequest with session id: " + request.getSession().getId());
 
         HttpSession session = request.getSession();
 
@@ -90,9 +96,10 @@ public class ItemOrderController {
 
             throw new ItemOrderNotCreateException(builder.toString());
         }
-
+        logger.info("validation of ItemOrderDTO complete successfully");
 
         itemOrderService.saveItemOrder(convertToItemOrder(itemOrderDTO), session);
+        logger.info("saving ItemOrder with owner id: " + itemOrderDTO.getOwnerDTO().getId());
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
@@ -105,10 +112,13 @@ public class ItemOrderController {
 
     @GetMapping("/{id}")
     public ItemOrderDTO getItemOrderById(@PathVariable("id") int id) {
+        logger.debug("catch ItemOrder id: " + id);
+
         Optional<ItemOrder> foundedItemOrder = itemOrderService.findItemOrderById(id);
         if (foundedItemOrder.isEmpty()) {
             throw new ItemOrderNotFoundException("Item order not found");
         }
+        logger.info("get itemOrder with id: " + id);
 
         return convertToItemOrderDTO(foundedItemOrder.get());
     }
@@ -117,6 +127,9 @@ public class ItemOrderController {
     @PatchMapping("/{id}")
     public ResponseEntity<HttpStatus> updateItemOrder(@PathVariable("id") int id,
                                                       @RequestBody @Valid ItemOrderDTO itemOrderDTO, BindingResult bindingResult) {
+        logger.debug("catch ItemOrder id: " + id);
+        logger.debug("catch ItemOrderDTO with ownerDTO id: " + itemOrderDTO.getOwnerDTO().getId());
+        logger.debug("catch BindingResult: " + bindingResult.getClass().getName());
 
         Optional<ItemOrder> foundedItemOrder = itemOrderService.findItemOrderById(id);
         if (foundedItemOrder.isEmpty()) {
@@ -144,8 +157,11 @@ public class ItemOrderController {
             }
         }
 
+
         ItemOrder updatedItemOrder = convertToItemOrder(itemOrderDTO);
+        logger.info("converting ItemOrderDTO to ItemOrder with owner id: " + updatedItemOrder.getOwner().getId());
         updatedItemOrder.setId(id);
+        logger.info("set id: " + id + " in updated ItemOrder");
 
         if (bindingResult.hasErrors()) {
             StringBuilder builder = new StringBuilder();
@@ -156,25 +172,33 @@ public class ItemOrderController {
 
             throw new ItemOrderNotUpdateException(builder.toString());
         }
+        logger.info("validation of updated ItemOrder with id: " + updatedItemOrder.getId() + " complete successfully");
 
         itemOrderService.updateItemOrder(updatedItemOrder);
+        logger.info("updating ItemOrder with id: " + updatedItemOrder.getId());
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
 
     @DeleteMapping("/{id}")
     public ResponseEntity<HttpStatus> deleteItemOrder(@PathVariable("id") int id) {
+        logger.debug("catch ItemOrder id: " + id);
+
         Optional<ItemOrder> deletedItemOrder = itemOrderService.findItemOrderById(id);
         if (deletedItemOrder.isEmpty()) {
             throw  new ItemOrderNotFoundException("Item order not found");
         }
+        logger.info("get ItemOrder with id: " + deletedItemOrder.get().getId());
 
         itemOrderService.deleteItemOrder(id);
+        logger.info("deleting ItemOrder with id: " + deletedItemOrder.get().getId());
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
 
     private ItemOrder convertToItemOrder(ItemOrderDTO itemOrderDTO) {
+        logger.debug("catch ItemOrderDTO with ownerDTO id: " + itemOrderDTO.getOwnerDTO().getId());
+
         ItemOrder itemOrder = new ItemOrder();
 
         Optional<Person> person = personService.findPersonById(itemOrderDTO.getOwnerDTO().getId());
@@ -190,11 +214,14 @@ public class ItemOrderController {
                 })
                 .collect(Collectors.toList());
         itemOrder.setItemEntries(itemEntries);
+        logger.info("converting ItemOrderDTO to ItemOrder with owner id: " + itemOrder.getOwner().getId());
 
         return itemOrder;
     }
 
     private ItemOrderDTO convertToItemOrderDTO(ItemOrder itemOrder) {
+        logger.debug("catch ItemOrder with owner id: " + itemOrder.getOwner().getId());
+
         ItemOrderDTO itemOrderDTO = new ItemOrderDTO();
         itemOrderDTO.setId(itemOrder.getId());
         itemOrderDTO.setOwnerDTO(modelMapper.map(itemOrder.getOwner(), PersonDTO.class));
@@ -210,6 +237,7 @@ public class ItemOrderController {
                 })
                 .collect(Collectors.toList());
         itemOrderDTO.setItemEntriesDTO(itemEntriesDTO);
+        logger.info("converting ItemOrder to ItemOrderDTO with ownerDTO id: " + itemOrderDTO.getOwnerDTO().getId());
 
         return itemOrderDTO;
     }
@@ -217,6 +245,7 @@ public class ItemOrderController {
 
     @ExceptionHandler
     private ResponseEntity<ItemOrderErrorResponse> handleException(ItemOrderNotCreateException exc) {
+        logger.error("itemOrder not create", exc);
         ItemOrderErrorResponse itemOrderErrorResponse = new ItemOrderErrorResponse(exc.getMessage(), System.currentTimeMillis());
 
         return new ResponseEntity<ItemOrderErrorResponse>(itemOrderErrorResponse, HttpStatus.BAD_REQUEST);
@@ -224,42 +253,49 @@ public class ItemOrderController {
 
     @ExceptionHandler
     private ResponseEntity<ItemOrderErrorResponse> handleException(ItemOrderNotFoundException exc) {
+        logger.error("itemOrder not found", exc);
         ItemOrderErrorResponse itemOrderErrorResponse = new ItemOrderErrorResponse(exc.getMessage(), System.currentTimeMillis());
         return new ResponseEntity<ItemOrderErrorResponse>(itemOrderErrorResponse, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler
     private ResponseEntity<ItemOrderErrorResponse> handleException(ItemOrderNotUpdateException exc) {
+        logger.error("itemOrder not update", exc);
         ItemOrderErrorResponse itemOrderErrorResponse = new ItemOrderErrorResponse(exc.getMessage(), System.currentTimeMillis());
         return new ResponseEntity<ItemOrderErrorResponse>(itemOrderErrorResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler
     public ResponseEntity<ItemOrderErrorResponse> handleException(DifferentOwnersException exc) {
+        logger.error("different owners", exc);
         ItemOrderErrorResponse itemOrderErrorResponse = new ItemOrderErrorResponse(exc.getMessage(), System.currentTimeMillis());
         return new ResponseEntity<ItemOrderErrorResponse>(itemOrderErrorResponse, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler
     private ResponseEntity<PersonErrorResponse> handleException(PersonNotFoundException exc) {
+        logger.error("person not found", exc);
         PersonErrorResponse personErrorResponse = new PersonErrorResponse(exc.getMessage(), System.currentTimeMillis());
         return new ResponseEntity<PersonErrorResponse>(personErrorResponse, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler
     private ResponseEntity<ItemErrorResponse> handleException(ItemNotFoundException exc) {
+        logger.error("item not found", exc);
         ItemErrorResponse itemErrorResponse = new ItemErrorResponse(exc.getMessage(), System.currentTimeMillis());
         return new ResponseEntity<ItemErrorResponse>(itemErrorResponse, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler
     private ResponseEntity<ItemErrorResponse> handleException(NumberOfItemsIsNotEnoughException exc) {
+        logger.error("number of items is not enough");
         ItemErrorResponse itemErrorResponse = new ItemErrorResponse(exc.getMessage(), System.currentTimeMillis());
         return new ResponseEntity<ItemErrorResponse>(itemErrorResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler
     private ResponseEntity<ItemEntryErrorResponse> handleException(ItemEntryNotFoundException exc) {
+        logger.error("itemEntry not found", exc);
         ItemEntryErrorResponse itemEntryErrorResponse = new ItemEntryErrorResponse(exc.getMessage(), System.currentTimeMillis());
         return new ResponseEntity<ItemEntryErrorResponse>(itemEntryErrorResponse, HttpStatus.NOT_FOUND);
     }

@@ -3,12 +3,16 @@ package org.stus.marketplace.models;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Objects;
 
 @Entity
 @Table(name = "item_entry")
 public class ItemEntry {
+    private static final Logger logger = LogManager.getLogger(ItemEntry.class.getName());
+
     @Column(name = "id")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,7 +41,9 @@ public class ItemEntry {
     }
 
     public void setId(int id) {
+        logger.debug("catch itemEntry id: " + id);
         this.id = id;
+        logger.info("set id: " + id + " in itemEntry");
     }
 
     public int getNumberOfItems() {
@@ -45,7 +51,9 @@ public class ItemEntry {
     }
 
     public void setNumberOfItems(int numberOfItems) {
+        logger.debug("catch itemEntry numberOfItems: " + numberOfItems);
         this.numberOfItems = numberOfItems;
+        logger.info("set numberOfItems: " + numberOfItems + " in itemEntry");
     }
 
     public Item getOrderedItem() {
@@ -53,7 +61,9 @@ public class ItemEntry {
     }
 
     public void setOrderedItem(Item orderedItem) {
+        logger.debug("catch itemEntry orderedItem with id: " + orderedItem.getId());
         this.orderedItem = orderedItem;
+        logger.info("set orderedItem with id: " + orderedItem.getId() + " in itemEntry");
     }
 
     public ItemOrder getItemOrder() {
@@ -61,7 +71,9 @@ public class ItemEntry {
     }
 
     public void setItemOrder(ItemOrder itemOrder) {
+        logger.debug("catch itemOrder with owner id: " + itemOrder.getOwner().getId());
         this.itemOrder = itemOrder;
+        logger.info("set itemOrder with owner id: " + itemOrder.getOwner().getId() + " in itemEntry");
     }
 
 

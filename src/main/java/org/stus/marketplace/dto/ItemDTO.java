@@ -3,8 +3,12 @@ package org.stus.marketplace.dto;
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class ItemDTO {
+    private static final Logger logger = LogManager.getLogger(ItemDTO.class.getName());
+
     private int id;
 
     @NotEmpty(message = "Item name should not be empty")
@@ -28,7 +32,9 @@ public class ItemDTO {
     }
 
     public void setId(int id) {
+        logger.debug("catch itemDTO id: " + id);
         this.id = id;
+        logger.info("set id: " + id + " in itemDTO");
     }
 
     public String getItemName() {
@@ -36,7 +42,9 @@ public class ItemDTO {
     }
 
     public void setItemName(String itemName) {
+        logger.debug("catch itemDTO itemName: " + itemName);
         this.itemName = itemName;
+        logger.info("set itemName: " + itemName + " in itemDTO");
     }
 
     public int getNumberOfItems() {
@@ -44,7 +52,9 @@ public class ItemDTO {
     }
 
     public void setNumberOfItems(int numberOfItems) {
+        logger.debug("catch itemDTO numberOfItems: " + numberOfItems);
         this.numberOfItems = numberOfItems;
+        logger.info("set numberOfItems: " + numberOfItems + " in itemDTO");
     }
 
     public int getPrice() {
@@ -52,7 +62,9 @@ public class ItemDTO {
     }
 
     public void setPrice(int price) {
+        logger.debug("catch itemDTO price: " + price);
         this.price = price;
+        logger.info("set price: " + price + " in itemDTO");
     }
 
     public String getItemInfo() {
@@ -60,7 +72,9 @@ public class ItemDTO {
     }
 
     public void setItemInfo(String itemInfo) {
+        logger.debug("catch itemDTO itemInfo: " + itemInfo);
         this.itemInfo = itemInfo;
+        logger.info("set itemInfo: " + itemInfo + " in itemDTO");
     }
 
     public String getCategory() {
@@ -68,7 +82,9 @@ public class ItemDTO {
     }
 
     public void setCategory(String category) {
+        logger.debug("catch itemDTO category: " + category);
         this.category = category;
+        logger.info("set category: " + category + " in itemDTO");
     }
 
 

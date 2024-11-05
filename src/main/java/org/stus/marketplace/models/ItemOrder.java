@@ -3,6 +3,8 @@ package org.stus.marketplace.models;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hibernate.annotations.Cascade;
 
 import java.util.Date;
@@ -12,6 +14,8 @@ import java.util.Objects;
 @Entity
 @Table(name = "item_order")
 public class ItemOrder {
+    private static final Logger logger = LogManager.getLogger(ItemOrder.class.getName());
+
     @Column(name = "id")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,7 +43,9 @@ public class ItemOrder {
     }
 
     public void setId(int id) {
+        logger.debug("catch itemOrder id:" + id);
         this.id = id;
+        logger.info("set id: " + id + " in itemOrder");
     }
 
     public Date getCreateAt() {
@@ -47,7 +53,9 @@ public class ItemOrder {
     }
 
     public void setCreateAt(Date createAt) {
+        logger.debug("catch itemOrder createAt: " + createAt);
         this.createAt = createAt;
+        logger.info("set createAt: " + createAt + " in itemOrder");
     }
 
     public Person getOwner() {
@@ -55,7 +63,9 @@ public class ItemOrder {
     }
 
     public void setOwner(Person owner) {
+        logger.debug("catch itemOrder owner with id: " + owner.getId());
         this.owner = owner;
+        logger.info("set owner with id: " + owner.getId() + " in itemOrder");
     }
 
     public List<ItemEntry> getItemEntries() {
@@ -63,7 +73,9 @@ public class ItemOrder {
     }
 
     public void setItemEntries(List<ItemEntry> itemEntries) {
+        logger.debug("catch itemOrder itemEntries with size: " + itemEntries.size());
         this.itemEntries = itemEntries;
+        logger.info("set itemEntries with size: " + itemEntries.size() + " in itemOrder");
     }
 
 

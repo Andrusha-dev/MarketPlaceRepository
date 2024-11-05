@@ -1,5 +1,7 @@
 package org.stus.marketplace.utils.item_utils;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
@@ -13,6 +15,7 @@ import java.util.List;
 @Component
 public class ItemDTOValidator implements Validator {
     private final ItemService itemService;
+    private static final Logger logger = LogManager.getLogger(ItemDTOValidator.class.getName());
 
     @Autowired
     public ItemDTOValidator(ItemService itemService) {
@@ -27,6 +30,7 @@ public class ItemDTOValidator implements Validator {
     @Override
     public void validate(Object target, Errors errors) {
         ItemDTO itemDTO = (ItemDTO)target;
+        logger.debug("catch itemDTO with name: " + itemDTO.getItemName());
 
         List<Item> items = itemService.findAllItems();
         for (Item item : items) {

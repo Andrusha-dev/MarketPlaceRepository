@@ -6,8 +6,11 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class PersonDTO {
+    private static final Logger logger = LogManager.getLogger(PersonDTO.class.getName());
     private int id;
 
     @NotEmpty(message = "Username should not be empty")
@@ -32,7 +35,9 @@ public class PersonDTO {
     }
 
     public void setId(int id) {
+        logger.debug("catch personDTO id: " + id);
         this.id = id;
+        logger.info("set id: " + id + " in personDTO");
     }
 
     public String getUsername() {
@@ -40,7 +45,9 @@ public class PersonDTO {
     }
 
     public void setUsername(String username) {
+        logger.debug("catch personDTO username: " + username);
         this.username = username;
+        logger.info("set username: " + username + " in personDTO");
     }
 
     public String getPassword() {
@@ -48,7 +55,9 @@ public class PersonDTO {
     }
 
     public void setPassword(String password) {
+        logger.debug("catch personDTO password: " + password);
         this.password = password;
+        logger.info("set password: " + password + " in personDTO");
     }
 
     public int getBirthYear() {
@@ -56,7 +65,9 @@ public class PersonDTO {
     }
 
     public void setBirthYear(int birthYear) {
+        logger.debug("catch personDTO bithYear: " + birthYear);
         this.birthYear = birthYear;
+        logger.info("set birthYear: " + birthYear + " in personDTO");
     }
 
     public String getEmail() {
@@ -64,7 +75,9 @@ public class PersonDTO {
     }
 
     public void setEmail(String email) {
+        logger.debug("catch personDTO email: " + email);
         this.email = email;
+        logger.info("set email: " + email + " in personDTO");
     }
 
     public String getPhone() {
@@ -72,6 +85,8 @@ public class PersonDTO {
     }
 
     public void setPhone(String phone) {
+        logger.debug("catch personDTO phone: " + phone);
         this.phone = phone;
+        logger.info("set phone: " + phone + " in personDTO");
     }
 }

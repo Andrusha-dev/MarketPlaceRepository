@@ -5,6 +5,8 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.Cascade;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 import java.util.Objects;
@@ -13,6 +15,7 @@ import java.util.Objects;
 @Entity
 @Table(name = "item")
 public class Item {
+    private static final Logger logger = LogManager.getLogger(Item.class.getName());
     @Column(name = "id")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,7 +54,9 @@ public class Item {
     }
 
     public void setId(int id) {
+        logger.debug("catch item id: " + id);
         this.id = id;
+        logger.info("set id: " + id + " in item");
     }
 
     public String getItemName() {
@@ -59,7 +64,9 @@ public class Item {
     }
 
     public void setItemName(String itemName) {
+        logger.debug("catch item itemName: " + itemName);
         this.itemName = itemName;
+        logger.info("set itemName: " + itemName + " in item");
     }
 
     public int getNumberOfItems() {
@@ -67,7 +74,9 @@ public class Item {
     }
 
     public void setNumberOfItems(int numberOfItems) {
+        logger.debug("catch item numberOfItems: " + numberOfItems);
         this.numberOfItems = numberOfItems;
+        logger.info("set numberOfItems: " + numberOfItems + " in item");
     }
 
     public int getPrice() {
@@ -75,7 +84,9 @@ public class Item {
     }
 
     public void setPrice(int price) {
+        logger.debug("catch item price: " + price);
         this.price = price;
+        logger.info("set price: " + price + " in item");
     }
 
     public String getItemInfo() {
@@ -83,7 +94,9 @@ public class Item {
     }
 
     public void setItemInfo(String itemInfo) {
+        logger.debug("catch item itemInfo: " + itemInfo);
         this.itemInfo = itemInfo;
+        logger.info("set itemInfo: " + itemInfo + " in item");
     }
 
     public String getCategory() {
@@ -91,7 +104,9 @@ public class Item {
     }
 
     public void setCategory(String category) {
+        logger.debug("catch item category: " + category);
         this.category = category;
+        logger.info("set category: " + category + " in item");
     }
 
     public List<ItemEntry> getItemEntries() {
@@ -99,7 +114,9 @@ public class Item {
     }
 
     public void setItemEntries(List<ItemEntry> itemEntries) {
+        logger.debug("catch item itemEntries with size: " + itemEntries.size());
         this.itemEntries = itemEntries;
+        logger.info("set itemEntries with size: " + itemEntries.size() + " in item");
     }
 
     /* //based only on "id"

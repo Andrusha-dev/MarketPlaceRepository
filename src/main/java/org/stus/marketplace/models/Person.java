@@ -8,6 +8,8 @@ import jakarta.validation.constraints.Size;
 import org.hibernate.annotations.Cascade;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.web.WebProperties;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 import java.util.Objects;
@@ -15,6 +17,8 @@ import java.util.Objects;
 @Entity
 @Table(name = "person")
 public class Person {
+    private static final Logger logger = LogManager.getLogger(Person.class.getName());
+
     @Column(name = "id")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -56,7 +60,9 @@ public class Person {
     }
 
     public void setId(int id) {
+        logger.debug("catch person id: " + id);
         this.id = id;
+        logger.info("set id: " + id + " in person");
     }
 
     public String getUsername() {
@@ -64,7 +70,9 @@ public class Person {
     }
 
     public void setUsername(String username) {
+        logger.debug("catch person username: " + username);
         this.username = username;
+        logger.info("set username: " + username + " in person");
     }
 
     public String getPassword() {
@@ -72,7 +80,9 @@ public class Person {
     }
 
     public void setPassword(String password) {
+        logger.debug("catch person password: " + password);
         this.password = password;
+        logger.info("set password: " + password + " in person");
     }
 
     public int getBirthYear() {
@@ -80,7 +90,9 @@ public class Person {
     }
 
     public void setBirthYear(int birthYear) {
+        logger.debug("catch person birthYear: " + birthYear);
         this.birthYear = birthYear;
+        logger.info("set birthYear: " + birthYear + " in person");
     }
 
     public String getEmail() {
@@ -88,7 +100,9 @@ public class Person {
     }
 
     public void setEmail(String email) {
+        logger.debug("catch person email: " + email);
         this.email = email;
+        logger.info("set email: " + email + " in person");
     }
 
     public String getPhone() {
@@ -96,7 +110,9 @@ public class Person {
     }
 
     public void setPhone(String phone) {
+        logger.debug("catch person phone: " + phone);
         this.phone = phone;
+        logger.info("set phone: " + phone + " in person");
     }
 
     public String getRole() {
@@ -104,7 +120,9 @@ public class Person {
     }
 
     public void setRole(String role) {
+        logger.debug("catch person role: " + role);
         this.role = role;
+        logger.info("set role: " + role + " in person");
     }
 
     public List<ItemOrder> getItemOders() {
@@ -112,7 +130,9 @@ public class Person {
     }
 
     public void setItemOders(List<ItemOrder> itemOders) {
+        logger.debug("catch itemOrders with size: " + itemOders.size());
         this.itemOders = itemOders;
+        logger.info("set itemOrders with size: " + itemOders.size() + " in person");
     }
 
 

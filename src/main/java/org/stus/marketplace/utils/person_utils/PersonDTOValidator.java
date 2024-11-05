@@ -1,6 +1,8 @@
 package org.stus.marketplace.utils.person_utils;
 
 import jakarta.persistence.Column;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
@@ -16,6 +18,7 @@ import java.util.regex.Pattern;
 @Component
 public class PersonDTOValidator implements Validator {
     private final PersonService personService;
+    private static final Logger logger = LogManager.getLogger(PersonDTOValidator.class.getName());
 
     @Autowired
     public PersonDTOValidator(PersonService personService) {
@@ -30,6 +33,7 @@ public class PersonDTOValidator implements Validator {
     @Override
     public void validate(Object target, Errors errors) {
         PersonDTO personDTO = (PersonDTO)target;
+        logger.debug("catch personDTO with name: " + personDTO.getUsername());
 
         String phone = personDTO.getPhone();
         String regex = "\\+38\\(0\\d{2}\\)\\d{3}-\\d{2}-\\d{2}";
