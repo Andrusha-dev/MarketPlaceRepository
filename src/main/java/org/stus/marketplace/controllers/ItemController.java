@@ -26,7 +26,7 @@ public class ItemController {
     private final ModelMapper modelMapper;
     private final ItemDTOValidator itemDTOValidator;
     private final ItemValidator itemValidator;
-    private static final Logger logger = LogManager.getLogger(ItemController.class);
+    private static final Logger logger = LogManager.getLogger(ItemController.class.getName());
 
     @Autowired
     public ItemController(ItemService itemService, ModelMapper modelMapper, ItemDTOValidator itemDTOValidator, ItemValidator itemValidator) {

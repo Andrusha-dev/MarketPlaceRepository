@@ -2,7 +2,7 @@
 <Configuration>
     <properties>
         <property name="propertyPattern">
-            %d{HH:mm:ss.SSS} [%t] %-5level %logger{36}:%L - %msg%n
+            %d{YYYY MMM dd HH:mm:ss.SSS} [%t] %-5level %logger{36}:%L - %msg%n
         </property>
     </properties>
     <Appenders>
@@ -25,60 +25,37 @@
             <LinkedTransferQueue/>
             <ThresholdFilter level="warn" onMatch="accept" onMismatch="deny"/>
         </Async>
+        <Socket name="Socket" host="127.0.0.1" port="5044">
+            <PatternLayout pattern="${propertyPattern}"/>
+        </Socket>
     </Appenders>
     <Loggers>
-        <Logger name="org.stus.marketplace.utils.item_utils.ItemDTOValidator" level="info" additivity="false">
-            <AppenderRef ref="Console"/>
-            <AppenderRef ref="RollingFile"/>
-        </Logger>
-        <Logger name="org.stus.marketplace.utils.item_utils.ItemValidator" level="info" additivity="false">
-            <AppenderRef ref="Console"/>
-            <AppenderRef ref="RollingFile"/>
-        </Logger>
-        <Logger name="org.stus.marketplace.utils.person_utils.PersonDTOValidator" level="info" additivity="false">
-            <AppenderRef ref="Console"/>
-            <AppenderRef ref="RollingFile"/>
-        </Logger>
-        <Logger name="org.stus.marketplace.utils.person_utils.PersonValidator" level="info" additivity="false">
-            <AppenderRef ref="Console"/>
-            <AppenderRef ref="RollingFile"/>
-        </Logger>
-        <Logger name="org.stus.marketplace.controllers.AuthController" level="info" additivity="false">
-            <AppenderRef ref="Console"/>
-            <AppenderRef ref="RollingFile"/>
-        </Logger>
-        <Logger name="org.stus.marketplace.services.PersonDetailsService" level="info" additivity="false">
-            <AppenderRef ref="Console"/>
-            <AppenderRef ref="RollingFile"/>
-        </Logger>
-        <Logger name="org.stus.marketplace.services.PersonService" level="info" additivity="false">
-            <AppenderRef ref="Console"/>
-            <AppenderRef ref="RollingFile"/>
-        </Logger>
-        <Logger name="org.stus.marketplace.services.ItemService" level="info" additivity="false">
-            <AppenderRef ref="Console"/>
-            <AppenderRef ref="RollingFile"/>
-        </Logger>
-        <Logger name="org.stus.marketplace.services.StoreService" level="info" additivity="false">
-            <AppenderRef ref="Console"/>
-            <AppenderRef ref="RollingFile"/>
-        </Logger>
-        <Logger name="org.stus.marketplace.services.ItemEntryService" level="info" additivity="false">
-            <AppenderRef ref="Console"/>
-            <AppenderRef ref="RollingFile"/>
-        </Logger>
-
-
-
-        <Logger name="org.stus.marketplace.controllers.ItemController" level="debug" additivity="false">
-            <AppenderRef ref="Console"/>
-            <AppenderRef ref="RollingFile"/>
-        </Logger>
-
-
+        <Logger name="org.stus.marketplace.controllers.AuthController" level="info" additivity="false"><AppenderRef ref="Console"/><AppenderRef ref="RollingFile"/><AppenderRef ref="Socket"/></Logger>
+        <Logger name="org.stus.marketplace.controllers.ItemController" level="info" additivity="false"><AppenderRef ref="Console"/><AppenderRef ref="RollingFile"/><AppenderRef ref="Socket"/></Logger>
+        <Logger name="org.stus.marketplace.controllers.ItemOrderController" level="info" additivity="false"><AppenderRef ref="Console"/><AppenderRef ref="RollingFile"/><AppenderRef ref="Socket"/></Logger>
+        <Logger name="org.stus.marketplace.controllers.PersonController" level="info" additivity="false"><AppenderRef ref="Console"/><AppenderRef ref="RollingFile"/><AppenderRef ref="Socket"/></Logger>
+        <Logger name="org.stus.marketplace.controllers.StoreController" level="info" additivity="false"><AppenderRef ref="Console"/><AppenderRef ref="RollingFile"/><AppenderRef ref="Socket"/></Logger>
+        <Logger name="org.stus.marketplace.dto.ItemDTO" level="info" additivity="false"><AppenderRef ref="Console"/><AppenderRef ref="RollingFile"/><AppenderRef ref="Socket"/></Logger>
+        <Logger name="org.stus.marketplace.dto.ItemEntryDTO" level="info" additivity="false"><AppenderRef ref="Console"/><AppenderRef ref="RollingFile"/><AppenderRef ref="Socket"/></Logger>
+        <Logger name="org.stus.marketplace.dto.ItemOrderDTO" level="info" additivity="false"><AppenderRef ref="Console"/><AppenderRef ref="RollingFile"/><AppenderRef ref="Socket"/></Logger>
+        <Logger name="org.stus.marketplace.dto.PersonDTO" level="info" additivity="false"><AppenderRef ref="Console"/><AppenderRef ref="RollingFile"/><AppenderRef ref="Socket"/></Logger>
+        <Logger name="org.stus.marketplace.models.Item" level="info" additivity="false"><AppenderRef ref="Console"/><AppenderRef ref="RollingFile"/><AppenderRef ref="Socket"/></Logger>
+        <Logger name="org.stus.marketplace.models.ItemEntry" level="info" additivity="false"><AppenderRef ref="Console"/><AppenderRef ref="RollingFile"/><AppenderRef ref="Socket"/></Logger>
+        <Logger name="org.stus.marketplace.models.ItemOrder" level="info" additivity="false"><AppenderRef ref="Console"/><AppenderRef ref="RollingFile"/><AppenderRef ref="Socket"/></Logger>
+        <Logger name="org.stus.marketplace.models.Person" level="info" additivity="false"><AppenderRef ref="Console"/><AppenderRef ref="RollingFile"/><AppenderRef ref="Socket"/></Logger>
+        <Logger name="org.stus.marketplace.security.PersonDetails" level="info" additivity="false"><AppenderRef ref="Console"/><AppenderRef ref="RollingFile"/><AppenderRef ref="Socket"/></Logger>
+        <Logger name="org.stus.marketplace.services.ItemEntryService" level="info" additivity="false"><AppenderRef ref="Console"/><AppenderRef ref="RollingFile"/><AppenderRef ref="Socket"/></Logger>
+        <Logger name="org.stus.marketplace.services.ItemOrderService" level="info" additivity="false"><AppenderRef ref="Console"/><AppenderRef ref="RollingFile"/><AppenderRef ref="Socket"/></Logger>
+        <Logger name="org.stus.marketplace.services.ItemService" level="info" additivity="false"><AppenderRef ref="Console"/><AppenderRef ref="RollingFile"/><AppenderRef ref="Socket"/></Logger>
+        <Logger name="org.stus.marketplace.services.PersonDetailsService" level="info" additivity="false"><AppenderRef ref="Console"/><AppenderRef ref="RollingFile"/><AppenderRef ref="Socket"/></Logger>
+        <Logger name="org.stus.marketplace.services.PersonService" level="info" additivity="false"><AppenderRef ref="Console"/><AppenderRef ref="RollingFile"/><AppenderRef ref="Socket"/></Logger>
+        <Logger name="org.stus.marketplace.services.StoreService" level="info" additivity="false"><AppenderRef ref="Console"/><AppenderRef ref="RollingFile"/><AppenderRef ref="Socket"/></Logger>
+        <Logger name="org.stus.marketplace.utils.item_utils.ItemDTOValidator" level="info" additivity="false"><AppenderRef ref="Console"/><AppenderRef ref="RollingFile"/><AppenderRef ref="Socket"/></Logger>
+        <Logger name="org.stus.marketplace.utils.item_utils.ItemValidator" level="info" additivity="false"><AppenderRef ref="Console"/><AppenderRef ref="RollingFile"/><AppenderRef ref="Socket"/></Logger>
+        <Logger name="org.stus.marketplace.utils.person_utils.PersonDTOValidator" level="info" additivity="false"><AppenderRef ref="Console"/><AppenderRef ref="RollingFile"/><AppenderRef ref="Socket"/></Logger>
+        <Logger name="org.stus.marketplace.utils.person_utils.PersonValidator" level="info" additivity="false"><AppenderRef ref="Console"/><AppenderRef ref="RollingFile"/><AppenderRef ref="Socket"/></Logger>
         <Root level="info">
             <AppenderRef ref="Console"/>
-            <AppenderRef ref="RollingFile"/>
         </Root>
     </Loggers>
 </Configuration>

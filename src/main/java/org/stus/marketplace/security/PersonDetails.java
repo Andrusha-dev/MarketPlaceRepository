@@ -1,5 +1,7 @@
 package org.stus.marketplace.security;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.GrantedAuthority;
@@ -14,6 +16,7 @@ import java.util.List;
 
 public class PersonDetails implements UserDetails {
     private Person person;
+    private static final Logger logger = LogManager.getLogger(PersonDetails.class.getName());
 
     public PersonDetails(Person person) {
         this.person = person;
@@ -60,6 +63,7 @@ public class PersonDetails implements UserDetails {
     }
 
     public void setPerson(Person person) {
+        logger.debug("catch Person with id: " + person.getId());
         this.person = person;
     }
 }
